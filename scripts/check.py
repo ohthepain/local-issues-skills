@@ -4,13 +4,14 @@ import argparse
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-NAMES = ("issue", "fix-issues", "issues")
+NAMES = ("issue", "fix-issues", "issues", "setup-local-issues")
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sync", action="store_true")
     args = parser.parse_args()
     contract = (ROOT / "references/queue.md").read_bytes()
+    template = (ROOT / "skills/setup-local-issues/triage-labels.md").read_bytes()
     errors = []
     for name in NAMES:
         folder = ROOT / "skills" / name
@@ -20,6 +21,11 @@ def main():
             target.write_bytes(contract)
         if not target.is_file() or target.read_bytes() != contract:
             errors.append(f"{name}: bundled contract differs; run with --sync")
+        seed = folder / "triage-labels.md"
+        if args.sync and name != "setup-local-issues":
+            seed.write_bytes(template)
+        if not seed.is_file() or seed.read_bytes() != template:
+            errors.append(f"{name}: bundled lifecycle template differs; run with --sync")
         text = (folder / "SKILL.md").read_text()
         parts = text.split("---", 2)
         if len(parts) != 3 or parts[0].strip():

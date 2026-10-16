@@ -1,8 +1,15 @@
 <div id="__ROOT__">
+  <div class="viz-row">
+    <label class="form-check"><input class="form-check-input" type="checkbox" data-role="select-all"><span class="form-check-label">Select all</span></label>
+    <span data-role="selection-count" aria-live="polite">0 selected</span>
+    <button class="btn" type="button" data-batch="close" disabled>Close selected</button>
+    <button class="btn" type="button" data-batch="next" disabled>Advance selected</button>
+    <button class="btn" type="button" data-batch="delete" disabled>Delete selected</button>
+  </div>
   <div class="table-responsive">
     <table class="table">
       <caption>__CAPTION__</caption>
-      <thead><tr><th scope="col">ID</th><th scope="col">Issue</th><th scope="col">Status</th><th scope="col">Work on issue</th></tr></thead>
+      <thead><tr><th scope="col">Select</th><th scope="col">ID</th><th scope="col">Issue</th><th scope="col">Status</th><th scope="col">Work on issue</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -18,42 +25,122 @@
   const notice = root.querySelector('[role="status"]');
   const fallback = root.querySelector('pre');
   const command = root.querySelector('code');
+  const selectAll = root.querySelector('[data-role="select-all"]');
+  const count = root.querySelector('[data-role="selection-count"]');
+  const batchButtons = Object.fromEntries(['close', 'next', 'delete'].map(mode => [mode, root.querySelector(`[data-batch="${mode}"]`)]));
+  const selected = new Set();
+  const submitted = new Set();
+  const checkboxes = new Map();
+  const rowButtons = [];
+  let sending = false;
+  function eligible(issue, mode) {
+    if (!selected.has(issue.id) || submitted.has(issue.id)) return false;
+    if (mode === 'delete') return issue.state === (data.closed_state || 'closed');
+    if (mode === 'close') return issue.state === (data.acceptance_state || 'ready-to-close') && issue.next_state === (data.closed_state || 'closed');
+    return issue.state !== (data.closed_state || 'closed') && !!issue.next_state && issue.next_state !== (data.closed_state || 'closed');
+  }
+  function updateControls() {
+    const available = data.issues.filter(issue => !submitted.has(issue.id));
+    count.textContent = `${selected.size} selected`;
+    selectAll.disabled = sending || !available.length;
+    selectAll.checked = !!available.length && available.every(issue => selected.has(issue.id));
+    selectAll.indeterminate = selected.size > 0 && !selectAll.checked;
+    for (const issue of data.issues) {
+      const checkbox = checkboxes.get(issue.id);
+      if (checkbox) {
+        checkbox.checked = selected.has(issue.id);
+        checkbox.disabled = sending || submitted.has(issue.id);
+      }
+    }
+    for (const [mode, button] of Object.entries(batchButtons)) {
+      const size = data.issues.filter(issue => eligible(issue, mode)).length;
+      const label = {close: 'Close selected', next: 'Advance selected', delete: 'Delete selected'}[mode];
+      button.textContent = size ? `${label} (${size})` : label;
+      button.disabled = sending || size === 0;
+    }
+    for (const {button, issue, verb} of rowButtons) button.disabled = sending || (verb !== 'select' && submitted.has(issue.id));
+  }
+  function requestFor(issue, verb, target) {
+    return {id: issue.id, expected_state: issue.state, action: verb, target_state: target};
+  }
+  async function send(prompt, affected) {
+    if (sending) return;
+    if (typeof window.openai?.sendFollowUpMessage !== 'function') {
+      notice.textContent = 'Chat actions are unavailable here. Copy this request into the chat.';
+      command.textContent = prompt;
+      fallback.hidden = false;
+      return;
+    }
+    sending = true;
+    fallback.hidden = true;
+    updateControls();
+    notice.textContent = 'Sending request…';
+    try {
+      await window.openai.sendFollowUpMessage({prompt});
+      for (const id of affected) { submitted.add(id); selected.delete(id); }
+      notice.textContent = 'Request sent. Saved statuses will appear in the refreshed list.';
+    } catch (error) {
+      notice.textContent = 'Request was not sent. Retry or copy it into the chat.';
+      command.textContent = prompt;
+      fallback.hidden = false;
+    } finally {
+      sending = false;
+      updateControls();
+    }
+  }
   function action(label, issue, verb, target) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'btn';
     button.textContent = label;
     button.setAttribute('aria-label', `${label}: ${issue.title} (${issue.id})`);
+    rowButtons.push({button, issue, verb});
     button.addEventListener('click', async () => {
       if (button.disabled) return;
-      const request = {project_root: data.project_root, id: issue.id,
-        expected_state: issue.state, action: verb, target_state: target};
+      const request = {project_root: data.project_root, ...requestFor(issue, verb, target)};
       const prompt = 'Use $issues to handle this explicit issue action: ' + JSON.stringify(request) +
         '. Resolve only this project and full ID. Reread the report and compare expected_state before any status change or deletion; if stale, leave it unchanged and refresh the list. ' +
         (verb === 'select' ? 'Select this issue for follow-up and keep its web app preview open. Do not edit source until I request a revision.' :
         'Apply the queue contract prerequisites. This action authorizes only the stated queue change, not source edits. Refresh the issue list afterward.');
-      if (typeof window.openai?.sendFollowUpMessage !== 'function') {
-        notice.textContent = 'Chat actions are unavailable here. Copy this request into the chat.';
-        command.textContent = prompt;
-        fallback.hidden = false;
-        return;
-      }
-      button.disabled = true;
-      notice.textContent = 'Sending request…';
-      try {
-        await window.openai.sendFollowUpMessage({prompt});
-        notice.textContent = 'Request sent. The saved status will appear in the refreshed list.';
-      } catch (error) {
-        button.disabled = false;
-        notice.textContent = 'Request was not sent. Retry or copy it into the chat.';
-        command.textContent = prompt;
-        fallback.hidden = false;
-      }
+      await send(prompt, verb === 'select' ? [] : [issue.id]);
     });
     return button;
   }
+  selectAll.addEventListener('change', () => {
+    if (sending) return;
+    for (const issue of data.issues) if (!submitted.has(issue.id)) {
+      if (selectAll.checked) selected.add(issue.id); else selected.delete(issue.id);
+    }
+    updateControls();
+  });
+  for (const [mode, button] of Object.entries(batchButtons)) button.addEventListener('click', async () => {
+    if (button.disabled) return;
+    const included = data.issues.filter(issue => eligible(issue, mode));
+    if (!included.length) return;
+    const request = {project_root: data.project_root, batch_action: mode,
+      actions: included.map(issue => requestFor(issue, mode === 'delete' ? 'delete' : 'next', mode === 'delete' ? null : issue.next_state)),
+      skipped_ids: data.issues.filter(issue => selected.has(issue.id) && !eligible(issue, mode)).map(issue => issue.id)};
+    const prompt = 'Use $issues to handle this explicit issue batch: ' + JSON.stringify(request) +
+      '. Resolve only this project and the listed full IDs. Read all targeted reports together, validate expected states and target states against the queue contract, and apply only eligible actions. Leave stale or blocked reports unchanged; do not act on skipped_ids. Do not edit source or open previews. Summarize applied, stale, blocked, missing, and skipped IDs, then refresh the table once after the batch.';
+    await send(prompt, included.map(issue => issue.id));
+  });
   for (const issue of data.issues) {
     const row = document.createElement('tr');
+    const select = document.createElement('td');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'form-check-input';
+    checkbox.setAttribute('aria-label', `Select ${issue.title} (${issue.id})`);
+    checkbox.addEventListener('change', () => {
+      if (sending || submitted.has(issue.id)) return;
+      if (checkbox.checked) selected.add(issue.id); else selected.delete(issue.id);
+      updateControls();
+    });
+    checkboxes.set(issue.id, checkbox);
+    const checkboxLabel = document.createElement('label');
+    checkboxLabel.className = 'form-check';
+    checkboxLabel.append(checkbox);
+    select.append(checkboxLabel);
     const id = document.createElement('td');
     id.textContent = issue.display_id || issue.id;
     const title = document.createElement('td');
@@ -62,7 +149,7 @@
     const value = document.createElement('div');
     value.textContent = issue.state;
     status.append(value);
-    if (issue.state === 'closed') status.append(action('Delete', issue, 'delete', null));
+    if (issue.state === (data.closed_state || 'closed')) status.append(action('Delete', issue, 'delete', null));
     else if (issue.next_state) status.append(action(`Next: ${issue.next_state}`, issue, 'next', issue.next_state));
     else if (issue.blocked_reason) {
       const reason = document.createElement('div');
@@ -71,9 +158,10 @@
     }
     const work = document.createElement('td');
     work.append(action('Work on issue', issue, 'select', null));
-    row.append(id, title, status, work);
+    row.append(select, id, title, status, work);
     body.append(row);
   }
+  updateControls();
   if (!data.issues.length) notice.textContent = 'No saved local issues.';
 })();
 </script>
