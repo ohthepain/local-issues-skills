@@ -17,16 +17,16 @@ If deferred or incomplete reports exist, offer `refine reports first` or `fix wh
 
 ## Work the queue
 
-Process oldest actionable reports first unless the user specifies a priority. Resume existing fixes/verification/commits before duplicating work. Refresh the queue between issues so newly captured bugs can be included.
+Process oldest actionable reports first unless the user specifies a priority. Resume existing fixes/verification/commits before duplicating work. Refresh the queue between issues so newly captured bugs can be included. Before implementing, review the queue for cohesive shared fixes under the contract's grouping rules. Keep the originally selected issue as the group anchor; announce any group before source edits and honor `don't group` steering.
 
-For each issue:
+For each issue (or cohesive group, retaining separate report states):
 
 1. Read its evidence and inspect the relevant code. Attempt reproduction or establish enough evidence for a bounded fix. Unlike capture, diagnosis here has no two-minute limit. Record unsuccessful attempts and uncertainty.
 2. When user information is necessary, persist the question and wait. Offer `go`, `later`/`l8`, `close`, and `x` with brief meanings when useful. Do not move to another issue without an answer authorizing it. With existing `go`, investigate autonomously until a genuine decision or verification boundary requires the user.
-3. Implement the smallest adequate fix within project requirements. Record changed files and reasoning sufficient to resume. Move to `ready-to-verify`.
-4. Run relevant checks and obtain required manual verification. Failures remain unresolved; repair them or ask about a blocker. Persist commands, results, and limitations. A user reply of `go` does not substitute for required verification.
+3. Implement the smallest adequate fix within project requirements. Record changed files and reasoning sufficient to resume. Move each affected report to `ready-to-verify` only when its fix exists.
+4. Run relevant checks and obtain required manual verification. Failures remain unresolved; repair them or ask about a blocker. Persist commands, results, and limitations for each report, including checks covering each grouped symptom. A user reply of `go` does not substitute for required verification.
 5. Apply the selected commit policy, recording the commit hash or that changes remain uncommitted. Move to `ready-to-close`; user acceptance is separate from permission to commit.
-6. Continue to the next actionable issue without asking permission at every successful step. Honor explicit closure/deletion/deferral commands under the shared contract.
+6. After `don't group`, finish only the original issue for this run. Otherwise continue to the next actionable issue without asking permission at every successful step. Honor explicit closure/deletion/deferral commands under the shared contract.
 
 Stop when all actionable work has reached `ready-to-close`/`closed`, or when a blocking question, execution limit, or user stop requires a pause. Do not busy-loop on unfixable issues or wait for future reports. Persist enough evidence and state for the next invocation to resume accurately.
 

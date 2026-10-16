@@ -4,7 +4,7 @@ import argparse
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-NAMES = ("issue", "fix-issues")
+NAMES = ("issue", "fix-issues", "issues")
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -34,7 +34,7 @@ def main():
                 errors.append(f"{name}: missing or nonlocal reference: {link}")
     if errors:
         raise SystemExit("\n".join(errors))
-    print("Both skill bundles pass metadata, reference, and contract checks.")
+    print(f"All {len(NAMES)} skill bundles pass metadata, reference, and contract checks.")
 
 if __name__ == "__main__":
     main()

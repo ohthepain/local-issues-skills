@@ -1,0 +1,79 @@
+<div id="__ROOT__">
+  <div class="table-responsive">
+    <table class="table">
+      <caption>__CAPTION__</caption>
+      <thead><tr><th scope="col">ID</th><th scope="col">Issue</th><th scope="col">Status</th><th scope="col">Work on issue</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p role="status" aria-live="polite"></p>
+  <pre hidden><code></code></pre>
+</div>
+<script type="application/json" id="__ROOT__-data">__DATA__</script>
+<script>
+(() => {
+  const root = document.getElementById('__ROOT__');
+  const data = JSON.parse(document.getElementById('__ROOT__-data').textContent);
+  const body = root.querySelector('tbody');
+  const notice = root.querySelector('[role="status"]');
+  const fallback = root.querySelector('pre');
+  const command = root.querySelector('code');
+  function action(label, issue, verb, target) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn';
+    button.textContent = label;
+    button.setAttribute('aria-label', `${label}: ${issue.title} (${issue.id})`);
+    button.addEventListener('click', async () => {
+      if (button.disabled) return;
+      const request = {project_root: data.project_root, id: issue.id,
+        expected_state: issue.state, action: verb, target_state: target};
+      const prompt = 'Use $issues to handle this explicit issue action: ' + JSON.stringify(request) +
+        '. Resolve only this project and full ID. Reread the report and compare expected_state before any status change or deletion; if stale, leave it unchanged and refresh the list. ' +
+        (verb === 'select' ? 'Select this issue for follow-up and keep its web app preview open. Do not edit source until I request a revision.' :
+        'Apply the queue contract prerequisites. This action authorizes only the stated queue change, not source edits. Refresh the issue list afterward.');
+      if (typeof window.openai?.sendFollowUpMessage !== 'function') {
+        notice.textContent = 'Chat actions are unavailable here. Copy this request into the chat.';
+        command.textContent = prompt;
+        fallback.hidden = false;
+        return;
+      }
+      button.disabled = true;
+      notice.textContent = 'Sending request…';
+      try {
+        await window.openai.sendFollowUpMessage({prompt});
+        notice.textContent = 'Request sent. The saved status will appear in the refreshed list.';
+      } catch (error) {
+        button.disabled = false;
+        notice.textContent = 'Request was not sent. Retry or copy it into the chat.';
+        command.textContent = prompt;
+        fallback.hidden = false;
+      }
+    });
+    return button;
+  }
+  for (const issue of data.issues) {
+    const row = document.createElement('tr');
+    const id = document.createElement('td');
+    id.textContent = issue.display_id || issue.id;
+    const title = document.createElement('td');
+    title.textContent = issue.title;
+    const status = document.createElement('td');
+    const value = document.createElement('div');
+    value.textContent = issue.state;
+    status.append(value);
+    if (issue.state === 'closed') status.append(action('Delete', issue, 'delete', null));
+    else if (issue.next_state) status.append(action(`Next: ${issue.next_state}`, issue, 'next', issue.next_state));
+    else if (issue.blocked_reason) {
+      const reason = document.createElement('div');
+      reason.textContent = issue.blocked_reason;
+      status.append(reason);
+    }
+    const work = document.createElement('td');
+    work.append(action('Work on issue', issue, 'select', null));
+    row.append(id, title, status, work);
+    body.append(row);
+  }
+  if (!data.issues.length) notice.textContent = 'No saved local issues.';
+})();
+</script>

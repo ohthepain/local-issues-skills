@@ -1,0 +1,5 @@
+interface:
+  display_name: "Fix Local Issues"
+  short_description: "Work through the local issue queue"
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Capture Local Issue"
+  short_description: "Capture a bug and investigate reproduction"
+policy:
+  allow_implicit_invocation: false
