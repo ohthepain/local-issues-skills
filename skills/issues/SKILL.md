@@ -5,16 +5,25 @@ description: List local project issues, select a report, and iterate on that iss
 
 # Browse and work on local issues
 
-Read [the queue contract](references/queue.md) for report format, states, and execution boundaries. Listing and selection are read-only; initialization and write steps apply only to an explicitly requested change.
+## List (fast path)
 
-## List
+With no issue ID or requested change, run the bundled helper once and display its output. The helper resolves the Git root, reads reports and lifecycle configuration, validates metadata, sorts, counts, and renders the table. Listing is read-only.
 
-With no issue ID or requested change, list the active project's queue and finish:
+```sh
+node <this-skill>/scripts/list-issues.mjs --project <active-project-path> --output <absolute-visualization-directory>/issues-<unique-name>.html
+```
 
-1. Resolve the project root (Git root when present) and inspect `.issues/`. If absent or empty, say there are no saved local issues. Create no files or exclusions.
-2. Read existing `.issues/triage-labels.md` for custom state meanings. Inspect reports, excluding configuration such as `triage-labels.md`. Use saved status metadata, not inferred progress from code or prose.
-3. Show ID, title, status, and **Work on issue** for each report. Include closed reports unless filtered. Sort oldest first by creation time, breaking ties by ID; honor explicit filters/sort requests. Preserve custom states and flag missing/invalid metadata rather than inventing values. Include malformed/unreadable reports by filename with a limitation.
-4. In Codex with inline HTML support, use [the interactive table procedure](references/interactive-table.md) to render real buttons. Use a Markdown table with commands only when inline rendering is unavailable. Give the displayed total/status counts. Listing itself makes no queue changes and opens no choice dialog.
+Use a unique durable output in the thread's writable visualization directory. Optional `--state <exact-state>` may be repeated; `--sort oldest|newest|title|state` defaults to oldest. Translate explicit filter/sort requests into these options. For requests these options cannot express, explain the limitation rather than silently dropping the request.
+
+Return the generated file using the inline renderer:
+
+```text
+visualize{"path":"/absolute-visualization-directory/issues-unique.html"}
+```
+
+The output already includes counts and diagnostics. Display it directly; listing needs no model review of report bodies, lifecycle prose, queue contract, or manifest construction. Node.js 22+ is required; the script bundles its YAML parser. If the runtime or inline renderer is unavailable, explain the limitation and use the read-only manual listing in [the table reference](references/interactive-table.md).
+
+Advance buttons are **requests**, derived from valid configured transitions. Evidence is checked only on dispatch. Listing never establishes prerequisites or acceptance. Read [the queue contract](references/queue.md) for selection, iteration, or mutations; those branches retain all evidence, expected-state, target, and acceptance checks.
 
 ## Batch status actions
 

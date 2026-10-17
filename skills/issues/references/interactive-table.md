@@ -1,5 +1,10 @@
 # Interactive issue table in Codex
 
+## Manual fallback and reviewed manifests
+
+The normal listing uses `scripts/list-issues.mjs` as described in SKILL.md. It offers candidate transitions as requests and checks evidence on click. The procedure below is only for a manual fallback or a separately reviewed manifest. If Node.js is unavailable, read reports and lifecycle definitions together and show a Markdown table with saved ID/title/status, explicit request commands, counts, and malformed-file warnings. Preserve oldest-first creation sorting (ID tie-break), requested filters, custom states, and read-only behavior.
+
+
 Use the host's inline visualization renderer, not a Markdown table containing button-looking text. This skill bundles a real HTML fragment with native buttons wired to `window.openai.sendFollowUpMessage({prompt})`. Follow the available visualization skill's rendering instructions when present. No MCP server or network service is needed for this fragment.
 
 1. After reading the reports and local states, write a reviewed JSON manifest in a temporary task directory:

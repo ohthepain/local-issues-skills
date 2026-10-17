@@ -35,6 +35,7 @@
   let sending = false;
   function eligible(issue, mode) {
     if (!selected.has(issue.id) || submitted.has(issue.id)) return false;
+    if (data.lifecycle_valid === false) return false;
     if (mode === 'delete') return issue.state === (data.closed_state || 'closed');
     if (mode === 'close') return issue.state === (data.acceptance_state || 'ready-to-close') && issue.next_state === (data.closed_state || 'closed');
     return issue.state !== (data.closed_state || 'closed') && !!issue.next_state && issue.next_state !== (data.closed_state || 'closed');
@@ -149,8 +150,8 @@
     const value = document.createElement('div');
     value.textContent = issue.state;
     status.append(value);
-    if (issue.state === (data.closed_state || 'closed')) status.append(action('Delete', issue, 'delete', null));
-    else if (issue.next_state) status.append(action(`Next: ${issue.next_state}`, issue, 'next', issue.next_state));
+    if (data.lifecycle_valid !== false && issue.state === (data.closed_state || 'closed')) status.append(action('Delete', issue, 'delete', null));
+    else if (issue.next_state) status.append(action(`${data.request_advances ? 'Request advance' : 'Next'}: ${issue.next_state}`, issue, 'next', issue.next_state));
     else if (issue.blocked_reason) {
       const reason = document.createElement('div');
       reason.textContent = issue.blocked_reason;

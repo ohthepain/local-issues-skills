@@ -40,3 +40,17 @@ Interactive table handler checks: run `node scripts/test-issue-table.cjs` (Node.
 In a disposable project, run setup alone; inspect copied template, preferences, and actual Git exclusion. Edit labels and add a `qa` stage with an explicit successor; rerun setup and verify customizations/reports are preserved. Repeat without Git and with a legacy two-column file. Capture should use the configured reproduction role. Advance individual/batch reports through `qa` only with its exit evidence, then close/delete using renamed acceptance/terminal states. Test missing targets, duplicate roles/states, cycles, stale configuration, and commits disabled (skip only the commit role). Listing an absent queue remains read-only.
 
 Packaging checks and simulated table handlers cover bundled templates and custom acceptance/terminal labels. Setup execution and model-driven custom progression have not yet been observed in a fresh agent session; this checklist does not claim those scenarios passed.
+
+## 2026-10-17 deterministic listing validation
+
+The `issues` fast path now runs bundled TypeScript-generated JavaScript with Node.js 22+. Advance controls offer configured candidate transitions as requests; evidence remains checked by the agent on dispatch. This deliberately moves evidence review out of listing.
+
+Observed automated checks on Node.js 24.4.1:
+
+- `npm run build` and `npm run typecheck` passed.
+- `npm test`: seven disposable-project CLI scenarios passed, plus existing simulated table handlers. Covered absent/empty queues without initialization, unchanged queue bytes, exact-state filters, creation sorting and tie-breaks, counts, custom and legacy lifecycle tables, no-commit bypass retaining QA, malformed YAML, invalid dates, lifecycle cycles, unusual state names, escaped titles, and output rejection inside the queue. A copied `issues` bundle ran without sibling skills or node_modules.
+- `python3 scripts/check.py --sync` then `python3 scripts/check.py` passed for all four standalone bundles; `git diff --check` passed.
+- An independent agent executed the helper in a disposable project and observed unchanged queue hashes, custom transitions, sorting/filtering, empty queues, and explicit malformed/cyclic configuration warnings. This tests helper execution, not the complete host-driven skill workflow.
+- A disposable Git project with 500 generated reports rendered in 123.8, 101.1, 98.2, 103.3, and 99.1 ms (median 101.1 ms), including process startup. No old-workflow or end-to-end model-latency comparison was measured.
+
+Live host rendering, click dispatch, and actual model adherence to the new one-call fast path remain unverified. No claim of zero-model invocation or new supported agents follows from these checks. The system skill validator could not run under the default Python because PyYAML is unavailable; repository metadata/reference/contract checks passed separately.

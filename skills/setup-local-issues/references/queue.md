@@ -38,6 +38,8 @@ Honor each state's exit conditions: clear `grill_later` when resuming a deferred
 
 For a closed report, show **Delete** rather than Next status, with an explicit `delete` command. `next` on a closed report reports that no next state exists; it does not silently delete. Deletion removes only the targeted report, preserves code/commits, and clears selected context only if that report was selected. No additional confirmation is needed for an explicit targeted delete.
 
+Read-only listings may offer **Request advance** for a structurally valid configured successor without interpreting report evidence. This is a candidate transition, not a finding that exit conditions are satisfied. Individual and batch dispatch must reread reports and enforce all evidence and acceptance rules above.
+
 When creating a host button, bind it to the full issue ID, project root, expected saved state, and specific target state or delete action. Recheck that expected state before applying it. A stale button leaves the report unchanged and refreshes its displayed action; duplicate dispatch must not advance twice or turn an advance into a deletion. Text commands may include `from <state>` to carry the same expected-state guard (for example, `/issues ebbb next from ready-for-repro`). Retain a command fallback wherever persistent buttons are unverified.
 
 ## Batch issue-list actions

@@ -1,0 +1,16 @@
+{
+  "name": "local-issues-skills-dev",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit --target es2022 --module nodenext --moduleResolution nodenext --strict src/list-issues.ts --types node",
+    "test": "node --test scripts/test-list-issues.cjs && node scripts/test-issue-table.cjs"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2",
+    "yaml": "2.9.1"
+  }
+}

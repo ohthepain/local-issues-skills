@@ -23,7 +23,7 @@ Codex is the initial target. Other agents have not been behaviorally validated. 
 
 ## Workflow
 
-Use `/issues` (or `$issues` in Codex) to list the queue. Select a report with `/issues ebbb`; then follow-up feedback such as “it needs to be even darker” applies to that same report. Selection opens or reuses the relevant web preview, and concrete revision requests update the issue and app without starting the entire fix queue. Listing is read-only; selection may open the preview but does not edit source or change report state. Each status also includes a next-status action, or Delete for closed reports. Use `/issues ebbb next` to advance when prerequisites are met, or `/issues ebbb delete` to remove a report without reverting code. Status changes do not run the fixer or claim unperformed verification. In Codex, the skill renders an interactive inline table with Work on issue and status buttons using `window.openai.sendFollowUpMessage`. Buttons submit a scoped request; the model validates and updates the saved report. Hosts without the chat bridge get a copyable command fallback. Actual host dispatch needs a live chat trial.
+Use `/issues` (or `$issues` in Codex) to list the queue. Select a report with `/issues ebbb`; then follow-up feedback such as “it needs to be even darker” applies to that same report. Selection opens or reuses the relevant web preview, and concrete revision requests update the issue and app without starting the entire fix queue. Listing is read-only; selection may open the preview but does not edit source or change report state. Each status includes Request advance for a valid configured successor, or Delete for closed reports. Evidence is checked when an action is requested. Use `/issues ebbb next` to advance when prerequisites are met, or `/issues ebbb delete` to remove a report without reverting code. Status changes do not run the fixer or claim unperformed verification. In Codex, the skill renders an interactive inline table with Work on issue and status buttons using `window.openai.sendFollowUpMessage`. Buttons submit a scoped request; the model validates and updates the saved report. Hosts without the chat bridge get a copyable command fallback. Actual host dispatch needs a live chat trial.
 
 For several updates, check the relevant rows and use **Close selected**, **Advance selected**, or **Delete selected**. Each sends one message and refreshes the table once. Closing accepts only reports awaiting closure; deletion applies only to closed reports. Mixed selections skip ineligible rows and report the results. Typed equivalents include `/issues close f838 0db3 d1cf 9394`, `/issues next <ID> <ID>`, and `/issues delete <ID> <ID>`.
 
@@ -43,7 +43,7 @@ The full behavior is defined in [the queue contract](references/queue.md). Proje
 
 ## Develop locally
 
-Requires Python 3.9 or newer for the repository checks; the inline issues table also uses Python 3.9+ to render its HTML fragment.
+Requires Python 3.9 or newer for the repository checks; the fast issues listing requires Node.js 22+. Its TypeScript source is built into standalone JavaScript with a bundled YAML parser; installed skills need no package installation. Python remains available for the manual reviewed-manifest renderer.
 
 Edit the relevant `skills/<name>/SKILL.md`. Edit the lifecycle seed in `skills/setup-local-issues/triage-labels.md`; `--sync` bundles it with every standalone skill. Edit shared workflow rules only in `references/queue.md`, then refresh the committed standalone bundles:
 
@@ -63,6 +63,8 @@ ln -s /absolute/path/to/local-issues-skills/skills/issues ~/.codex/skills/issues
 Repository edits are then available through those links without reinstalling. After changing shared rules, run `--sync` before invoking a skill. Start a new chat if the current chat has already loaded an older version.
 
 Run the [manual behavior checklist](docs/validation.md) when changing workflow behavior. Packaging checks do not prove agent behavior. An HTML queue view with links into the app is deferred.
+
+For helper development, run `npm ci`, `npm run build`, `npm run typecheck`, and `npm test`. Commit the generated `skills/issues/scripts/list-issues.mjs` and YAML license with source changes. Listing uses one helper invocation; the model still invokes it and displays the output.
 
 ## Publication
 
