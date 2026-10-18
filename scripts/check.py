@@ -4,7 +4,7 @@ import argparse
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-NAMES = ("issue", "fix-issues", "issues", "setup-local-issues")
+QUEUE_NAMES = ("issue", "fix-issues", "issues", "setup-local-issues")
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -13,7 +13,7 @@ def main():
     contract = (ROOT / "references/queue.md").read_bytes()
     template = (ROOT / "skills/setup-local-issues/triage-labels.md").read_bytes()
     errors = []
-    for name in NAMES:
+    for name in QUEUE_NAMES:
         folder = ROOT / "skills" / name
         target = folder / "references/queue.md"
         if args.sync:
@@ -26,6 +26,13 @@ def main():
             seed.write_bytes(template)
         if not seed.is_file() or seed.read_bytes() != template:
             errors.append(f"{name}: bundled lifecycle template differs; run with --sync")
+    folders = sorted((ROOT / "skills").iterdir())
+    folders = [folder for folder in folders if folder.is_dir()]
+    for folder in folders:
+        name = folder.name
+        if not (folder / "SKILL.md").is_file():
+            errors.append(f"{name}: missing SKILL.md")
+            continue
         text = (folder / "SKILL.md").read_text()
         parts = text.split("---", 2)
         if len(parts) != 3 or parts[0].strip():
@@ -40,7 +47,7 @@ def main():
                 errors.append(f"{name}: missing or nonlocal reference: {link}")
     if errors:
         raise SystemExit("\n".join(errors))
-    print(f"All {len(NAMES)} skill bundles pass metadata, reference, and contract checks.")
+    print(f"All {len(folders)} skills pass metadata/reference checks; {len(QUEUE_NAMES)} queue bundles pass contract checks.")
 
 if __name__ == "__main__":
     main()

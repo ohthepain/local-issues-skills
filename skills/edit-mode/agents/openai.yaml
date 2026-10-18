@@ -1,0 +1,5 @@
+interface:
+  display_name: "Collect edit requests"
+  short_description: "Run the app so users can request layout edits"
+policy:
+  allow_implicit_invocation: false

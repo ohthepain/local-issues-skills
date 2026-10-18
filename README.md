@@ -2,12 +2,27 @@
 
 Agent skills for capturing, triaging, and fixing local project issues through a lightweight Markdown queue.
 
+- **edit-mode** adds hover outlines, element and general comments, deletion marks, and resize proposals to a local website. Review checkboxes select concrete changes for confirmation before implementation. It works without a local issue queue.
+- **proto-tutorial** builds one guided walkthrough over the real app or a labeled reproduction, with an info panel, target arrow, navigation controls, and a copyable results summary. It works without a local issue queue.
 - **setup-local-issues** copies an editable lifecycle to `.issues/triage-labels.md`, preserving existing configuration on reruns.
 - **issues** lists saved reports and statuses. Select one with `/issues <ID>`, then iterate on it while keeping the app preview open.
 - **issue** saves one report per distinct issue in your message and returns immediately with a `repro <ID>` or `fix <ID>` command. Reproduction and clarification happen only when requested.
 - **fix-issues** resumes the queue, investigates and fixes actionable reports, can group related issues into a shared fix, verifies changes, and optionally commits them. You accept closure separately.
 
 Reports live in the active project's `.issues/` directory. The skills keep this queue separate from external trackers and follow the project's `AGENTS.md` instructions. They do not automatically create GitHub issues, push code, or release changes.
+
+## Why keep issues locally?
+
+Issues are specs for work. Keeping them in `.issues/` puts them beside the code and project instructions your coding agent already uses. You can read and edit them in your editor, and the agent can search and review them directly without navigating to GitHub or Jira or requiring a tracker integration. Saved reports also preserve context between coding sessions.
+
+Having the queue in the workspace makes a few common tasks easier:
+
+- **Bulk operations:** review several reports together and advance, close, or delete eligible issues in one request or table action.
+- **Related fixes:** let the agent identify issues that share a cause and group them into a single fix, with verification recorded for each report.
+- **One-click fixes:** use **Quick fix** for issues assessed as ready for a bounded implementation. The button starts the fix and checks; accepting closure remains a separate step. Hosts without interactive buttons provide copyable commands.
+- **Working with other skills:** use local reports as context for planning and review. For example, ask the agent to review locally stored Wayfinder tickets together, or use grilling to challenge an issue's assumptions and scope before implementation. The files provide shared context; these skills do not need a dedicated integration with this queue.
+
+GitHub and Jira remain useful for team coordination. A local queue is a convenient place to work through issues with a coding agent, whether or not you also use an external tracker.
 
 ## Install
 
@@ -17,7 +32,7 @@ Once these files are published to GitHub:
 npx skills add ohthepain/local-issues-skills --skill setup-local-issues --skill issue --skill fix-issues --skill issues
 ```
 
-Any skill can also be installed alone by selecting only its name. Each includes its own queue contract. See the [skills CLI documentation](https://github.com/vercel-labs/skills) for agent and installation options.
+Any skill can also be installed alone by selecting only its name. Each queue skill includes its own queue contract; `proto-tutorial` and `edit-mode` are independent of the queue. See the [skills CLI documentation](https://github.com/vercel-labs/skills) for agent and installation options.
 
 Codex is the initial target. Other agents have not been behaviorally validated. Invoke the installed skill by name (for example, `$issue`, `$fix-issues`, or `$issues` in Codex); interfaces may display them as slash commands.
 
@@ -47,7 +62,7 @@ The full behavior is defined in [the queue contract](references/queue.md). Proje
 
 Requires Python 3.9 or newer for the repository checks; the fast issues listing requires Node.js 22+. Its TypeScript source is built into standalone JavaScript with a bundled YAML parser; installed skills need no package installation. Python remains available for the manual reviewed-manifest renderer.
 
-Edit the relevant `skills/<name>/SKILL.md`. Edit the lifecycle seed in `skills/setup-local-issues/triage-labels.md`; `--sync` bundles it with every standalone skill. Edit shared workflow rules only in `references/queue.md`, then refresh the committed standalone bundles:
+Edit the relevant `skills/<name>/SKILL.md`. Edit the lifecycle seed in `skills/setup-local-issues/triage-labels.md`; `--sync` bundles it with every standalone queue skill. Edit shared workflow rules only in `references/queue.md`, then refresh the committed standalone bundles:
 
 ```sh
 python3 scripts/check.py --sync
@@ -75,3 +90,15 @@ Before publishing, run the checks, review the complete diff, and record any manu
 ## License
 
 [MIT](LICENSE)
+
+## Guided verification and reproduction
+
+Invoke `/proto-tutorial` (or `$proto-tutorial` in Codex) with a fix, issue, or reproduction steps. The skill creates one explicitly launched walkthrough, preferably in the actual app, with Back, Next, Skip, Restart, Close, and Reopen controls. Navigation alone does not verify a fix. Restart resets safe tutorial-owned fixtures while preserving real app changes. Results stay in memory with a Copy report action; issue transitions remain separate.
+
+For local installation, link `skills/proto-tutorial` into your agent's skill directory as `proto-tutorial`. It requires no sibling skill or queue setup.
+
+## Visual feedback and editing
+
+Invoke `/edit-mode` (or `$edit-mode` in Codex) with accessible website source. The agent generates an opt-in development interface over the running app, preserving normal controls. Feedback survives same-origin navigation. Review changes offers checked-by-default checkboxes; the model proposes concrete fixes and asks for confirmation before editing product code. It then runs available checks and shows the result when browser access permits.
+
+The bundle contains integration instructions, not a prebuilt extension. Browser access and feedback transfer depend on the host; Copy/export and chat confirmation provide a fallback. For local installation, link `skills/edit-mode` into your agent's skill directory as `edit-mode`.

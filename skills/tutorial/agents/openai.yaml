@@ -1,0 +1,5 @@
+interface:
+  display_name: "Walk me through an issue or feature"
+  short_description: "Walk through an issue or feature in a tutorial"
+policy:
+  allow_implicit_invocation: false
