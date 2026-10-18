@@ -54,3 +54,18 @@ Observed automated checks on Node.js 24.4.1:
 - A disposable Git project with 500 generated reports rendered in 123.8, 101.1, 98.2, 103.3, and 99.1 ms (median 101.1 ms), including process startup. No old-workflow or end-to-end model-latency comparison was measured.
 
 Live host rendering, click dispatch, and actual model adherence to the new one-call fast path remain unverified. No claim of zero-model invocation or new supported agents follows from these checks. The system skill validator could not run under the default Python because PyYAML is unavailable; repository metadata/reference/contract checks passed separately.
+
+## Enhancement capture and optional prototype routing
+
+Run these scenarios in a disposable project with each skill installed alone. Record actual model behavior separately from helper/packaging results.
+
+- Capture “1. Add CSV export. 2. Add a dark theme.” Save two reports with separate original wording, IDs, mapped states, and command fallbacks; shared context survives in both. End without implementation or a questionnaire.
+- Capture “Export crashes: 1. Open a report. 2. Click Export.” Save one bug with both steps and a repro command. Numbers alone must not create multiple reports. Repeat with examples, ambiguous related items, and mixed bug/feature input.
+- Capture a clear workflow enhancement: record reproduction as inapplicable and use the implementation role. Capture a feature with unresolved behavior: use grilling. `fix <ID>` works with only the issue skill installed and preserves scope, verification, commit policy, and separate acceptance. `repro <ID>` on a feature records why reproduction does not apply without authorizing source edits.
+- After grilling an uncertain new interaction, record the model's prototype decision and design question, enter the mapped prototype role, show a disposable prototype, and persist user refinements. Keep the issue there while design choices remain. Agreed decisions allow implementation; prototype checks alone cannot establish production verification.
+- For a bounded bug or well-defined enhancement, record why a prototype adds no value and skip it. An explicit skip-reproduction request records the reason and verification plan; it does not waive tests or acceptance.
+- Repeat with renamed states, a custom stage before implementation, an older seven-role lifecycle, and legacy two-column definitions. Existing configurations remain unchanged unless a needed prototype stage must be inserted. Preserve other custom stages and reports. Reject duplicate prototype roles and stale targets. Listing only offers candidates and cannot decide whether a prototype is useful or accept a design.
+
+Automated helper tests cover the optional role with a renamed state, old files without it, duplicate-role rejection, and unchanged queue bytes. These checks do not establish model routing, capture splitting, prototype quality, or live preview behavior.
+
+2026-10-18 validation in this Codex session: build, typecheck, nine disposable-project CLI tests, simulated table handlers, synchronized bundle checks, and whitespace checks passed. A self-directed disposable Git project at `/tmp/issues-enhancements-o6ez3mq7` exercised the routing examples by saving two independent feature reports, one bug containing numbered steps, and one unresolved prototype design report. The helper listed all four with their configured states, no diagnostics, and unchanged queue bytes. This was a manual model walkthrough with constructed inputs, not an independent agent trial or a live prototype/refinement session. Fresh-session capture adherence and end-to-end prototype feedback remain unverified; no additional supported-agent claim is made.

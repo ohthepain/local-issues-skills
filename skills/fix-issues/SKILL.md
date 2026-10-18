@@ -1,6 +1,6 @@
 ---
 name: fix-issues
-description: Work through a project's local issue queue, refining reports, fixing bugs, verifying changes, and optionally committing them.
+description: Work through a project's local issue queue, refining reports, implementing fixes and enhancements, verifying changes, and optionally committing them.
 ---
 
 # Fix local issues
@@ -21,9 +21,9 @@ Process oldest actionable reports first unless the user specifies a priority. Re
 
 For each issue (or cohesive group, retaining separate report states):
 
-1. Read its evidence and inspect the relevant code. Attempt reproduction or establish enough evidence for a bounded fix. Unlike capture, diagnosis here has no two-minute limit. Record unsuccessful attempts and uncertainty.
+1. Read its evidence and inspect the relevant code. Apply the contract's routing: reproduce applicable bugs or establish enough intended behavior for a bounded enhancement, recording why reproduction is skipped. Unlike capture, diagnosis here has no two-minute limit. Record unsuccessful attempts and uncertainty.
 2. When user information is necessary, persist the question and wait. Offer `go`, `later`/`l8`, `close`, and `x` with brief meanings when useful. Do not move to another issue without an answer authorizing it. With existing `go`, investigate autonomously until a genuine decision or verification boundary requires the user.
-3. Implement the smallest adequate fix within project requirements. Record changed files and reasoning sufficient to resume. Move each affected report to `ready-to-verify` only when its fix exists.
+3. After grilling, use the model to decide whether the contract's optional prototype stage would help settle design choices. Record the decision; when useful, enter `ready-to-prototype`, build and show the disposable prototype, and wait for necessary user design decisions before production implementation. Otherwise skip the optional stage. Implement the smallest adequate fix within project requirements. Record changed files and reasoning sufficient to resume. Move each affected report to `ready-to-verify` only when its fix exists.
 4. Run relevant checks and obtain required manual verification. Failures remain unresolved; repair them or ask about a blocker. Persist commands, results, and limitations for each report, including checks covering each grouped symptom. A user reply of `go` does not substitute for required verification.
 5. Apply the selected commit policy, recording the commit hash or that changes remain uncommitted. Move to `ready-to-close`; user acceptance is separate from permission to commit.
 6. After `don't group`, finish only the original issue for this run. Otherwise continue to the next actionable issue without asking permission at every successful step. Honor explicit closure/deletion/deferral commands under the shared contract.

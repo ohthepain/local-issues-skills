@@ -8,6 +8,7 @@ import { parse } from 'yaml';
 type Stage = { role: string; state: string; next?: string };
 type Issue = { id: string; title: string; state: string; created: string; path: string; next_state?: string; blocked_reason?: string };
 const roles = ['ready-for-grilling', 'ready-for-repro', 'ready-to-fix', 'ready-to-verify', 'ready-for-commit', 'ready-to-close', 'closed'];
+const optionalRoles = ['ready-to-prototype'];
 const text = (file: string) => readFileSync(file, 'utf8');
 const plain = (value: string) => value.trim().replace(/^`(.*)`$/, '$1');
 const escape = (value: string) => value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
@@ -27,7 +28,8 @@ function lifecycle(file: string): Stage[] {
   if (roleAt >= 0 && nextAt < 0) throw Error('Lifecycle lacks Next state column.');
   if (new Set(stages.map(s => s.state)).size !== stages.length || stages.some(s => !s.state)) throw Error('Duplicate or missing lifecycle state.');
   for (const role of roles) if (stages.filter(s => s.role === role).length !== 1) throw Error(`Lifecycle requires one ${role} role.`);
-  if (stages.some(s => !roles.includes(s.role) && s.role !== 'custom')) throw Error('Unknown lifecycle role.');
+  for (const role of optionalRoles) if (stages.filter(s => s.role === role).length > 1) throw Error(`Lifecycle permits at most one ${role} role.`);
+  if (stages.some(s => !roles.includes(s.role) && !optionalRoles.includes(s.role) && s.role !== 'custom')) throw Error('Unknown lifecycle role.');
   const byState = new Map(stages.map(s => [s.state, s]));
   for (const stage of stages) {
     const seen = new Set<string>();

@@ -74,3 +74,17 @@ test('unusual saved state names count literally',()=>fixture(dir=>{
  setup(dir);report(dir,'a','__proto__');report(dir,'b','constructor');
  const {data}=run(dir);assert.equal(data.counts.__proto__,1);assert.equal(data.counts.constructor,1);
 }));
+
+test('optional prototype role supports renamed states and remains optional for existing queues',()=>fixture(dir=>{
+ const labels=template.replaceAll('`ready-to-prototype` | `ready-to-prototype`','`ready-to-prototype` | `design-lab`').replace('`to-do` | `ready-to-prototype`','`to-do` | `design-lab`');
+ setup(dir,labels);report(dir,'feature','design-lab');
+ const before=snapshot(path.join(dir,'.issues'));
+ const {data}=run(dir);assert.equal(data.lifecycle_valid,true);assert.equal(data.issues[0].next_state,'in-progress');assert.deepEqual(snapshot(path.join(dir,'.issues')),before);
+ const old=template.split('\n').filter(line=>!line.startsWith('| `ready-to-prototype`')).join('\n').replace('`to-do` | `ready-to-prototype`','`to-do` | `in-progress`');
+ fs.writeFileSync(path.join(dir,'.issues/triage-labels.md'),old);report(dir,'feature','to-do');
+ assert.equal(run(dir).data.issues[0].next_state,'in-progress');
+}));
+test('duplicate optional prototype roles block transitions',()=>fixture(dir=>{
+ setup(dir,template+'\n| `ready-to-prototype` | `second-design` | `in-progress` | Design |\n');report(dir,'feature','to-do');
+ const {data}=run(dir);assert.equal(data.lifecycle_valid,false);assert(data.warnings.some(w=>w.includes('at most one ready-to-prototype')));assert(!data.issues[0].next_state);
+}));
