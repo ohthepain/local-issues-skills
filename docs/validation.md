@@ -69,3 +69,12 @@ Run these scenarios in a disposable project with each skill installed alone. Rec
 Automated helper tests cover the optional role with a renamed state, old files without it, duplicate-role rejection, and unchanged queue bytes. These checks do not establish model routing, capture splitting, prototype quality, or live preview behavior.
 
 2026-10-18 validation in this Codex session: build, typecheck, nine disposable-project CLI tests, simulated table handlers, synchronized bundle checks, and whitespace checks passed. A self-directed disposable Git project at `/tmp/issues-enhancements-o6ez3mq7` exercised the routing examples by saving two independent feature reports, one bug containing numbered steps, and one unresolved prototype design report. The helper listed all four with their configured states, no diagnostics, and unchanged queue bytes. This was a manual model walkthrough with constructed inputs, not an independent agent trial or a live prototype/refinement session. Fresh-session capture adherence and end-to-end prototype feedback remain unverified; no additional supported-agent claim is made.
+
+
+## Quick fix actions
+
+In a disposable project, inspect a bounded reproduced issue and save the contract's readiness assessment with its current state and updated timestamp. Listing should put Quick fix below Work on issue only for that eligible report. Unassessed, deferred, closed, stale-assessment, and unset-commit-policy rows have no button. Confirm listing changes no queue files.
+
+Click Quick fix: send one scoped `quick-fix` request with project/full ID/expected state, revalidate readiness against the report and source, then implement only that issue using saved verification and commit policy. Preserve separate acceptance. Replay the click, change the state, edit the report, or introduce a new required decision: stale/ineligible requests must not edit source; new blockers must pause. Test cancellation/retry and unavailable bridge fallback. Work on issue continues to select without edits. Do not group unrelated reports.
+
+2026-10-18: build, typecheck, ten disposable CLI tests, bundle checks, whitespace checks, and simulated handlers passed. Added checks cover eligibility/freshness/commit policy, vertical button placement, scoped identity, duplicate suppression, cancellation retry, and command fallback. The tests execute the helper in disposable projects and the real fragment handlers in a simulated DOM. Live rendering/click dispatch and an end-to-end model-driven quick fix remain unverified.

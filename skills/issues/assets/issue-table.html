@@ -101,7 +101,7 @@
       const request = {project_root: data.project_root, ...requestFor(issue, verb, target)};
       const prompt = 'Use $issues to handle this explicit issue action: ' + JSON.stringify(request) +
         '. Resolve only this project and full ID. Reread the report and compare expected_state before any status change or deletion; if stale, leave it unchanged and refresh the list. ' +
-        (verb === 'select' ? 'Select this issue for follow-up and keep its web app preview open. Do not edit source until I request a revision.' :
+        (verb === 'quick-fix' ? 'Revalidate quick-fix readiness, report freshness, scope, and commit policy. If still eligible, fix only this issue, verify it, apply the saved commit policy, and leave it open for acceptance. Stop for any newly discovered required decision or verification boundary. Refresh the issue list afterward.' : verb === 'select' ? 'Select this issue for follow-up and keep its web app preview open. Do not edit source until I request a revision.' :
         'Apply the queue contract prerequisites. This action authorizes only the stated queue change, not source edits. Refresh the issue list afterward.');
       await send(prompt, verb === 'select' ? [] : [issue.id]);
     });
@@ -159,6 +159,12 @@
     }
     const work = document.createElement('td');
     work.append(action('Work on issue', issue, 'select', null));
+    if (issue.quick_fix === true && data.lifecycle_valid !== false && !issue.blocked_reason &&
+        issue.state !== (data.closed_state || 'closed') && issue.state !== (data.acceptance_state || 'ready-to-close')) {
+      const quick = document.createElement('div');
+      quick.append(action('Quick fix', issue, 'quick-fix', null));
+      work.append(quick);
+    }
     row.append(select, id, title, status, work);
     body.append(row);
   }

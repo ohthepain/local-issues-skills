@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { parse } from 'yaml';
 
 type Stage = { role: string; state: string; next?: string };
-type Issue = { id: string; title: string; state: string; created: string; path: string; next_state?: string; blocked_reason?: string };
+type Issue = { id: string; title: string; state: string; created: string; path: string; next_state?: string; blocked_reason?: string; quick_fix?: boolean };
 const roles = ['ready-for-grilling', 'ready-for-repro', 'ready-to-fix', 'ready-to-verify', 'ready-for-commit', 'ready-to-close', 'closed'];
 const optionalRoles = ['ready-to-prototype'];
 const text = (file: string) => readFileSync(file, 'utf8');
@@ -66,7 +66,7 @@ function main() {
   if (actualOutput === actualQueue || actualOutput.startsWith(actualQueue + '/')) throw Error('Output must be outside .issues.');
   const warnings: string[] = [], issues: Issue[] = [];
   const files = existsSync(queue) ? readdirSync(queue).filter(name => /\.md$/i.test(name) && name !== 'triage-labels.md').sort() : [];
-  let stages: Stage[] = [], noCommit = false, preferencesValid = true;
+  let stages: Stage[] = [], noCommit = false, preferencesValid = true, commitKnown = false;
   if (files.length) {
     try { stages = lifecycle(join(queue, 'triage-labels.md')); } catch (error) { warnings.push(String(error)); }
     const prefs = join(queue, 'preferences.json');
@@ -74,6 +74,7 @@ function main() {
       const value = JSON.parse(text(prefs));
       if (!value || ![true, false, null].includes(value.commit)) throw Error('commit must be true, false, or null');
       noCommit = value.commit === false;
+      commitKnown = typeof value.commit === 'boolean';
     } catch (error) { preferencesValid = false; warnings.push(`preferences.json: ${error}`); }
   }
   for (const name of files) try {
@@ -95,6 +96,11 @@ function main() {
       if (noCommit && next === stages.find(s => s.role === 'ready-for-commit')?.state) next = stages.find(s => s.role === 'ready-for-commit')?.next;
       issue.next_state = next;
     }
+    const assessment = data.quick_fix;
+    issue.quick_fix = !!stage && !issue.blocked_reason && commitKnown && stage.role === 'ready-to-fix' &&
+      data.grill_later !== true && assessment?.state === data.state &&
+      typeof data.updated === 'string' && Number.isFinite(Date.parse(data.updated)) &&
+      assessment?.assessed_updated === data.updated && typeof assessment?.reason === 'string' && !!assessment.reason.trim();
     issues.push(issue);
   } catch (error) { warnings.push(`${name}: ${error}`); }
   const duplicates = new Set(issues.filter((issue, i) => issues.findIndex(other => other.id === issue.id) !== i).map(issue => issue.id));

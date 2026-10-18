@@ -42,6 +42,14 @@ Require unique State values, exactly one mapping for each required workflow role
 
 Stages may be skipped when their exit conditions are already met. A claim of reproduction requires an observed failure; a hypothesis may still support a fix if uncertainty and the verification method are explicit. Never fabricate evidence. With commits disabled, verified changes skip the commit-role row by following its configured successor (retaining intervening custom stages), recording that they remain uncommitted. A later edit invalidates affected verification. Reopen to the appropriate stage if the user reports the bug persists.
 
+## Quick-fix readiness
+
+After inspecting a report and relevant code during reproduction, refinement, or investigation, the model may assess that a bounded implementation can proceed without further user interaction. Save `quick_fix` metadata only when intended behavior, scope, and verification are clear, no design questions or required manual checks remain, `grill_later` is false, the saved state maps to `ready-to-fix`, and the commit preference is explicitly true or false. State alone is insufficient. Do not investigate just to populate a listing.
+
+Use a mapping with `state` equal to the saved state, `assessed_updated` equal to the report's current `updated` timestamp, and a concise `reason` explaining readiness. Any later report edit must update `updated` and remove or reassess `quick_fix`; changed evidence, code, configuration, or user feedback can invalidate it too. A listing may display the saved assessment, but dispatch must reread the report and relevant source to revalidate actual readiness. Missing, stale, deferred, closed, or malformed assessments provide no Quick fix action. The manual listing fallback follows the same rules.
+
+Clicking **Quick fix** explicitly authorizes autonomous work on only that report, relevant verification, and the saved local commit policy. Recheck expected state and readiness before source edits; stale/ineligible dispatch writes nothing and refreshes the list. New decisions or required manual verification still pause the work. Finish at `ready-to-close` and request separate acceptance; do not automatically close, group, push, or publish. Work on issue remains selection only.
+
 ## Issue-list status actions
 
 `/issues <ID> next` requests one status advance for that report; `/issues <ID> delete` deletes that report under the existing `x` semantics. Resolve an exact ID or unique prefix in the active project and reread the report before acting. These actions edit queue metadata only: do not start reproduction, implement code, run the fix queue, or change the preview. Selection of a different report is unnecessary. Record an actual transition with an updated timestamp and brief reason, preserving original evidence and unrelated fields.

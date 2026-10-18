@@ -114,6 +114,31 @@ async function main() {
     await noBridge['[data-batch="close"]'].click();
     assert.equal(noBridge.pre.hidden, false);
     assert(noBridge.code.textContent.includes('explicit issue batch'));
+    data.issues = [
+      {id: 'quick', title: 'Bounded fix', state: 'in-progress', quick_fix: true},
+      {id: 'ordinary', title: 'No assessment', state: 'in-progress'},
+      {id: 'closed', title: 'Closed', state: 'closed', quick_fix: true},
+    ];
+    const quickCalls = [];
+    const quick = mount({sendFollowUpMessage: async request => quickCalls.push(request)});
+    const work = quick.tbody.children[0].children[4];
+    assert.equal(work.children[0].textContent, 'Work on issue');
+    const quickButton = work.children[1].children[0];
+    assert.equal(quickButton.textContent, 'Quick fix');
+    assert.equal(quick.tbody.children[1].children[4].children.length, 1);
+    assert.equal(quick.tbody.children[2].children[4].children.length, 1);
+    await quickButton.click();await quickButton.click();
+    assert.equal(quickCalls.length, 1);
+    assert(quickCalls[0].prompt.includes('"action":"quick-fix"'));
+    assert(quickCalls[0].prompt.includes('"expected_state":"in-progress"'));
+    assert(quickCalls[0].prompt.includes('fix only this issue'));
+    const quickFallback = mount(undefined);
+    await quickFallback.tbody.children[0].children[4].children[1].children[0].click();
+    assert.equal(quickFallback.pre.hidden, false);
+    assert(quickFallback.code.textContent.includes('"action":"quick-fix"'));
+    const quickRejected = mount({sendFollowUpMessage: async () => { throw Error('cancelled'); }});
+    const quickRetry = quickRejected.tbody.children[0].children[4].children[1].children[0];
+    await quickRetry.click();assert.equal(quickRetry.disabled, false);
     data.acceptance_state = 'resolved';
     data.closed_state = 'done';
     data.issues = [

@@ -88,3 +88,16 @@ test('duplicate optional prototype roles block transitions',()=>fixture(dir=>{
  setup(dir,template+'\n| `ready-to-prototype` | `second-design` | `in-progress` | Design |\n');report(dir,'feature','to-do');
  const {data}=run(dir);assert.equal(data.lifecycle_valid,false);assert(data.warnings.some(w=>w.includes('at most one ready-to-prototype')));assert(!data.issues[0].next_state);
 }));
+
+test('quick fix requires a current assessment, implementation state and known commit policy',()=>fixture(dir=>{
+ setup(dir);fs.writeFileSync(path.join(dir,'.issues/preferences.json'),'{"commit":true}');
+ const updated='2026-10-18T10:00:00Z';
+ function assessed(id,state='in-progress',change={}) {
+  const data={id,title:'Bounded fix',state,created:updated,updated,grill_later:false,quick_fix:{state,assessed_updated:updated,reason:'Observed failure, bounded correction and automated verification.'},...change};
+  fs.writeFileSync(path.join(dir,'.issues',id+'.md'),'---\n'+Object.entries(data).map(([k,v])=>`${k}: ${JSON.stringify(v)}`).join('\n')+'\n---\n');
+ }
+ assessed('eligible');assessed('stale','in-progress',{updated:'2026-10-18T11:00:00Z'});assessed('deferred','in-progress',{grill_later:true});assessed('closed','closed');report(dir,'unassessed','in-progress');
+ const before=snapshot(path.join(dir,'.issues'));const {data}=run(dir);
+ assert.deepEqual(data.issues.filter(i=>i.quick_fix).map(i=>i.id),['eligible']);assert.deepEqual(snapshot(path.join(dir,'.issues')),before);
+ fs.writeFileSync(path.join(dir,'.issues/preferences.json'),'{"commit":null}');assert(run(dir).data.issues.every(i=>!i.quick_fix));
+}));
