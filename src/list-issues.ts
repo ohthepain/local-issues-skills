@@ -65,7 +65,7 @@ function main() {
   const actualQueue = existsSync(queue) ? realpathSync(queue) : resolve(realpathSync(root), '.issues');
   if (actualOutput === actualQueue || actualOutput.startsWith(actualQueue + '/')) throw Error('Output must be outside .issues.');
   const warnings: string[] = [], issues: Issue[] = [];
-  const files = existsSync(queue) ? readdirSync(queue).filter(name => /\.md$/i.test(name) && name !== 'triage-labels.md').sort() : [];
+  const files = existsSync(queue) ? readdirSync(queue).filter(name => /\.md$/i.test(name) && !['triage-labels.md', 'github-import-index.md'].includes(name)).sort() : [];
   let stages: Stage[] = [], noCommit = false, preferencesValid = true, commitKnown = false;
   if (files.length) {
     try { stages = lifecycle(join(queue, 'triage-labels.md')); } catch (error) { warnings.push(String(error)); }

@@ -101,3 +101,14 @@ test('quick fix requires a current assessment, implementation state and known co
  assert.deepEqual(data.issues.filter(i=>i.quick_fix).map(i=>i.id),['eligible']);assert.deepEqual(snapshot(path.join(dir,'.issues')),before);
  fs.writeFileSync(path.join(dir,'.issues/preferences.json'),'{"commit":null}');assert(run(dir).data.issues.every(i=>!i.quick_fix));
 }));
+
+test('GitHub import bookkeeping is excluded while malformed reports remain diagnostic',()=>fixture(dir=>{
+ setup(dir);report(dir,'real-issue','in-progress');
+ fs.writeFileSync(path.join(dir,'.issues/github-import-index.md'),'# GitHub import index\n\nImport bookkeeping without issue frontmatter.\n');
+ fs.writeFileSync(path.join(dir,'.issues/broken-issue.md'),'Malformed actual report');
+ const before=snapshot(path.join(dir,'.issues'));
+ const {data}=run(dir);
+ assert.deepEqual(data.issues.map(i=>i.id),['real-issue']);
+ assert.equal(data.warnings.length,1);assert(data.warnings[0].includes('broken-issue.md: Error: Missing YAML frontmatter.'));
+ assert.deepEqual(snapshot(path.join(dir,'.issues')),before);
+}));
