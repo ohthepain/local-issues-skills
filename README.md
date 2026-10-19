@@ -2,7 +2,7 @@
 
 Agent skills for capturing, triaging, and fixing local project issues through a lightweight Markdown queue.
 
-- **edit-mode** adds hover outlines, element and general comments, deletion marks, and resize proposals to a local website. Review checkboxes select concrete changes for confirmation before implementation. It works without a local issue queue.
+- **edit-mode** adds hover outlines, element and general comments, deletion marks, live element resizing, and typography proposals to a local website. Review checkboxes select concrete changes for confirmation before implementation. It works without a local issue queue.
 - **proto-tutorial** builds one guided walkthrough over the real app or a labeled reproduction, with an info panel, target arrow, navigation controls, and a copyable results summary. It works without a local issue queue.
 - **setup-local-issues** copies an editable lifecycle to `.issues/triage-labels.md`, preserving existing configuration on reruns.
 - **issues** lists saved reports and statuses. Select one with `/issues <ID>`, then iterate on it while keeping the app preview open.
@@ -93,12 +93,16 @@ Before publishing, run the checks, review the complete diff, and record any manu
 
 ## Guided verification and reproduction
 
+Invoke `/repro-steps` (or `$repro-steps` in Codex) to build a lightweight recorder in a web app. The user drives; Start recording, Restart, and Bug reproduced produce a copyable Markdown recipe and ordered action log. Collection stays in memory, survives same-document navigation, and clears on full reload. Reports are neither saved nor submitted automatically. The skill works alone or alongside tutorial, with independent controls. Install the standalone `skills/repro-steps` folder. This is an instruction bundle that generates app-specific tooling, not a prebuilt recorder extension.
+
 Invoke `/proto-tutorial` (or `$proto-tutorial` in Codex) with a fix, issue, or reproduction steps. The skill creates one explicitly launched walkthrough, preferably in the actual app, with Back, Next, Skip, Restart, Close, and Reopen controls. Navigation alone does not verify a fix. Restart resets safe tutorial-owned fixtures while preserving real app changes. Results stay in memory with a Copy report action; issue transitions remain separate.
 
 For local installation, link `skills/proto-tutorial` into your agent's skill directory as `proto-tutorial`. It requires no sibling skill or queue setup.
 
 ## Visual feedback and editing
 
-Invoke `/edit-mode` (or `$edit-mode` in Codex) with accessible website source. The agent generates an opt-in development interface over the running app, preserving normal controls. Feedback survives same-origin navigation. Review changes offers checked-by-default checkboxes; the model proposes concrete fixes and asks for confirmation before editing product code. It then runs available checks and shows the result when browser access permits.
+Invoke `/edit-mode on` (or `$edit-mode on` in Codex) with accessible website source; bare `/edit-mode` also enables it. First use generates local development tooling; subsequent uses reuse it. `/edit-mode off` disables it without deleting drafts or tooling. Fresh app launches and full reloads default off; feedback drafts survive same-origin navigation. Overlay files stay locally excluded through Git info/exclude and outside production build inputs, without persistent tracked integration changes. **Done** exits edit mode and opens review with checked-by-default checkboxes. **Confirm and send** submits the selected requests for implementation; ambiguous interpretations require clarification before edits. It then runs available checks and reloads the app with edit mode off when browser access permits.
 
 The bundle contains integration instructions, not a prebuilt extension. Browser access and feedback transfer depend on the host; Copy/export and chat confirmation provide a fallback. For local installation, link `skills/edit-mode` into your agent's skill directory as `edit-mode`.
+
+Edit-mode resizing previews actual element dimensions and layout. A bold italic **f** button on text elements previews font family, size, and color. These browser-only previews are reversible; Done/off restores app styling while preserving requests for confirmation.
