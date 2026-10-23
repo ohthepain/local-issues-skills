@@ -1,9 +1,9 @@
 ---
-name: proto-tutorial
+name: tutorial
 description: Build one interactive guided walkthrough to verify a fix, reproduce a bug, or demonstrate prototype functionality, with an anchored info panel and arrow.
 ---
 
-# Prototype tutorial
+# Tutorial
 
 Build one focused experience that lets the user perform the actions and judge the result. Inspired by Matt Pocock's prototype approach: answer a concrete question, expose relevant state, and keep disposable code easy to run and remove. This skill is standalone; it requires neither prototype nor local issue skills.
 

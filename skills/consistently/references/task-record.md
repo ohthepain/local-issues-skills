@@ -1,0 +1,13 @@
+# Saved task record
+
+Use a small task directory with these authoritative artifacts. Adapt serialization to the tool; keep one source of truth for each rule.
+
+- `task.md`: stable ID and matching description, original request, contract revision, inputs/defaults/allowed ranges, exact target rules and exclusions, expected effects, success checks, repeat/recovery policy, authorization context, and unresolved assumptions. Separate fixed roots from any explicitly allowed dynamic selection beneath them. Record platform or account identity when selecting the wrong environment would change the effects.
+- `implementation/`: executable code or the complete saved procedure, with a documented entrypoint, working directory, dependencies, relevant versions, required configuration names, and verification command. Prompt-only implementations retain the prompt, tool choices, ordered procedure, and output requirements; state the limits of reproducibility.
+- `checks/`: fixtures and independent acceptance checks where executable checks are practical. Otherwise retain a concrete verification procedure and evidence requirements. For model-generated content, record which properties are verifiable and which require judgment.
+- `runs/`: one uniquely named record per invocation, including timestamp, contract/implementation revision or hashes, effective parameters, relevant environment, attempted actions, observed effects, postcondition evidence, status, and recovery checkpoints. Redact secrets and minimize personal data; reference sensitive artifacts instead of copying them into logs.
+- `repairs/`: failure evidence, prior implementation reference, candidate change, contract-preservation rationale, checks performed and results, promotion decision, and retry outcome. Preserve recoverable prior versions locally or through existing version control without making an unsolicited commit.
+
+Write records atomically where possible. Persist a run's identity and intended effects before mutation, then update checkpoints as effects complete. An interrupted or missing completion record means outcome unknown until reconciled. Save enough evidence to recover without assuming that a failed command had no effects.
+
+Explicit user changes increment the contract revision and retain the earlier contract. Machinery-only repairs change the implementation revision. Return a precise invocation such as `$consistently run <task-id>` together with the task's absolute directory; use that directory to resolve the task when the active project differs. Saved authorization documents context, not a permanent grant of access or permission for unrelated effects.

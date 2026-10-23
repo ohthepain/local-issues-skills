@@ -1,5 +1,13 @@
 # Manual behavior validation
 
+## Handoff issue scenarios
+
+Include relevant `grill-me` and `grill-me-with-docs` exchanges, with some answers already saved to a document and others present only in chat. Include known reproduction steps, expected behavior, an agent observation, an architectural decision, modified and proposed files, a failed experiment, an untried rejected idea, and an unrun continuation command. Verify the handoff preserves these distinctions, references saved answers rather than duplicating them, records command prerequisites and working directory, and does not initiate grilling or assume those skill names are installed. With missing evidence, verify optional sections are omitted or meaningful gaps identified without invented details.
+
+In a disposable project, load only `handoff-issue` and use a conversation containing two independent tasks, a corrected decision, an unverified user report, a failed check, and an existing spec/issue/diff. Use synthetic secrets and personal details only. Invoke with a matching topic string: verify scope, discussion-only context, accurate evidence labels, artifact pointers instead of copied content, and relevant available Skill-tool recommendations. Try an unmatched string and confirm clarification precedes writing. Invoke without arguments: verify both tasks are covered separately, the multi-task warning appears, and focused invocation syntax is explained. Repeat with one task and with no identifiable task.
+
+Verify the file is uniquely created in TMPDIR, or /tmp when unset, and no workspace file changes. Check Windows TEMP in a Windows environment; check that an unavailable selected directory produces an explicit failure without workspace fallback. Confirm redaction covers document text, filenames, commands, personal path components, and access-bearing URLs; use two invocations to check no overwrite. Inspect the delivered path/prompt, temporary-storage notice, and permissions where supported. Record actual agent/OS observations separately from packaging checks; these scenarios are not passed behavioral tests.
+
 Use a disposable Git repository with a small reproducible bug. These scenarios are a checklist, not a record of passed tests. Record the agent/version, scenario, observed outcome, and limitations when running them.
 
 - Install each skill separately into an isolated skill directory. Confirm its queue reference resolves without the sibling.
@@ -139,3 +147,12 @@ Repeat with tutorial available: actions outside its planned steps are captured, 
 2026-10-19 close repro panel: check the plain borderless top-right ×, accessible name, and keyboard focus visibility. Close during a pending edit: flush it, stop capture, dismiss the panel, preserve app behavior, and retain the in-memory collection. Reopen through the launch control without resuming recording. Closing/reopening must not enter the journal, claim reproduction, drag the panel, or click through to the app. Whitespace checks passed; generated browser behavior remains untested.
 
 2026-10-19 report popup refinement: verify its plain top-right × dismisses the report without losing edited fields or resuming capture. Reopen and copy after entering observed and expected steps; both visible and copied reports must preserve the latest user wording separately from recorded actions. Supply a completely different bug from the original scenario and verify it survives without being rewritten to match the tutorial or attached to the original issue automatically. Whitespace checks passed; generated browser behavior remains untested.
+
+
+## Consistently validation
+
+Use only a disposable project and synthetic data. Load `consistently` alone. Ask it to make a repeatable cleanup tool for a specific fixture build folder, preserving a sibling folder and a named file. Verify the saved contract resolves roots, exclusions, symlinks, and repeat policy before effects. A creation-only request must preserve fixture contents. Run explicitly, recreate eligible files, and rerun from a fresh session using only the saved task path; compare selection and exclusions.
+
+Break an executable dependency and request repair. Verify the repaired implementation passes independent checks, retains the earlier revision, records the repair, and preserves target scope. Remove the saved root, add an outside symlink, and create an ambiguous second task: verify no expanded cleanup or guessed task selection. Interrupt a synthetic append operation after one effect; verify recovery reconciles the effect before retrying. Request a wider scope explicitly and verify a retained, incremented contract revision. Exercise concurrent invocation and exhausted repair attempts.
+
+2026-10-22: repository metadata/reference/bundle checks passed for the new skill. The system quick validator could not run because its Python environment lacks PyYAML. These are packaging observations; the scenarios above have not been executed by an independent agent, and no live Xcode cleanup was performed.

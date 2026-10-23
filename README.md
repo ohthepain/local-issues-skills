@@ -2,6 +2,8 @@
 
 Agent skills for capturing, triaging, and fixing local project issues through a lightweight Markdown queue.
 
+- **consistently** turns a prompt into a saved tool with fixed scope, reusable implementation, acceptance checks, and run history. Repairs preserve the saved contract. Invoke `$consistently` with a task, then `$consistently run <task-id>` to repeat it. Standalone; initial agent behavior remains unverified.
+- **handoff-issue** saves conversation context for a fresh agent in the OS temporary directory, with artifact references and suggested skills. Use `$handoff-issue "task, feature, or bug"` for a focused handoff or `$handoff-issue` for the entire discussion; multiple tasks trigger a warning. It works without a local issue queue.
 - **edit-mode** adds hover outlines, element and general comments, deletion marks, live element resizing, and typography proposals to a local website. Review checkboxes select concrete changes for confirmation before implementation. It works without a local issue queue.
 - **proto-tutorial** builds one guided walkthrough over the real app or a labeled reproduction, with an info panel, target arrow, navigation controls, and a copyable results summary. It works without a local issue queue.
 - **setup-local-issues** copies an editable lifecycle to `.issues/triage-labels.md`, preserving existing configuration on reruns.

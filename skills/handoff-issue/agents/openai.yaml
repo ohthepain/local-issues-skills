@@ -1,0 +1,5 @@
+interface:
+  display_name: "Handoff Issue"
+  short_description: "Create a handoff document for a particular topic in this channel"
+policy:
+  allow_implicit_invocation: false
